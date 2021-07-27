@@ -1,13 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const multer = require('multer');
+
 const path = require('path');
 /* Importation framework mongoose */
 const mongoose = require('mongoose');
-/* router stuff */
-const stuffRoutes = require('./routes/sauces');
-app.use('/api/stuff', stuffRoutes);
 /* router authentification */
 const userRoutes = require('./routes/user');
 // Routes sauces
@@ -35,9 +32,11 @@ app.use((req, res, next) => {
 });
 app.use(bodyParser.json());
 app.use('/images', express.static(path.join(__dirname, 'images')));
-// Requetes concernant les sauces
-app.use('/api/sauces', saucesRoutes);
 /* Requetes authentification */
 app.use('/api/auth', userRoutes);
+
+// Requetes concernant les sauces
+
+app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;

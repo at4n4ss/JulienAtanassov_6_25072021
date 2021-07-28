@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-
+const sanitizerPlugin = require('mongoose-sanitizer-plugin');
+// Création du model Sauce
 const Sauce = mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -13,5 +14,5 @@ const Sauce = mongoose.Schema({
   usersLiked: { type: [String], required: true },
   usersDisliked: { type: [String], required: true }
 });
-
+Sauce.plugin(sanitizerPlugin);
 module.exports = mongoose.model('Sauce', Sauce);

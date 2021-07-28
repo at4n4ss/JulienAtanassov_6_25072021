@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
+// Plugin qui permet de rendre unique chaque User
 const uniqueValidator = require('mongoose-unique-validator');
 
+// Création du modéle User
 const userSchema = mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true }

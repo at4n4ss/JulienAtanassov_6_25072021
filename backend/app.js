@@ -1,15 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-
 const path = require('path');
-/* Importation framework mongoose */
+// Importation framework mongoose
 const mongoose = require('mongoose');
-/* router authentification */
+// Router authentification
 const userRoutes = require('./routes/user');
 // Routes sauces
 const saucesRoutes = require('./routes/sauces');
-/* Connection avec la base de donnée mongoose */
+// Connection avec la base de donnée mongoose
 mongoose
   .connect(
     'mongodb+srv://at4:29041995stak4n0v@cluster0.ctk3o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
@@ -17,7 +16,7 @@ mongoose
   )
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
-/* ----- */
+// Access control
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*', 'cross-origin');
   res.setHeader(
@@ -30,13 +29,13 @@ app.use((req, res, next) => {
   );
   next();
 });
+//  BodyParser
 app.use(bodyParser.json());
+// Gestion des fichiers image
 app.use('/images', express.static(path.join(__dirname, 'images')));
-/* Requetes authentification */
+// Requetes authentification
 app.use('/api/auth', userRoutes);
-
 // Requetes concernant les sauces
-
 app.use('/api/sauces', saucesRoutes);
 
 module.exports = app;

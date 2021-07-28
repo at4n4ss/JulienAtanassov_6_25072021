@@ -1,6 +1,8 @@
-// tokens d'authentification
+// Tokens d'authentification
 const jwt = require('jsonwebtoken');
+// Accès au model User
 const User = require('../models/User');
+// Cryptage du password
 const bcrypt = require('bcrypt');
 
 exports.signup = (req, res, next) => {
@@ -18,7 +20,6 @@ exports.signup = (req, res, next) => {
     })
     .catch(error => res.status(500).json({ error }));
 };
-
 exports.login = (req, res, next) => {
   User.findOne({ email: req.body.email })
     .then(user => {

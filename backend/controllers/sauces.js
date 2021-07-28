@@ -1,14 +1,21 @@
+// Accès au model Sauce
 const Sauce = require('../models/sauce');
+// Permet de manipuler les fichiers
 const fs = require('fs');
 
+// Export des fonctions reliées aux sauces
 exports.createSauce = (req, res, next) => {
   const sauceObject = JSON.parse(req.body.sauce);
   delete sauceObject._id;
   const sauce = new Sauce({
     ...sauceObject,
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${
+      req.file.filename
+    }`,
     likes: 0,
     dislikes: 0,
-    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    usersLiked: [],
+    usersDisliked: []
   });
   sauce
     .save()
@@ -16,21 +23,50 @@ exports.createSauce = (req, res, next) => {
     .catch(error => res.status(400).json({ error }));
 };
 exports.modifySauce = (req, res, next) => {
-  const sauceObject = req.file
-    ? {
+  let sauceObject = {};
+  req.file
+    ? // Si la modification contient une image => Utilisation de l'opérateur ternaire comme structure conditionnelle.
+      (Sauce.findOne({
+        _id: req.params.id
+      }).then(sauce => {
+        // On supprime l'ancienne image du serveur
+        const filename = sauce.imageUrl.split('/images/')[1];
+        fs.unlinkSync(`images/${filename}`);
+      }),
+      (sauceObject = {
+        // On modifie les données et on ajoute la nouvelle image
         ...JSON.parse(req.body.sauce),
         imageUrl: `${req.protocol}://${req.get('host')}/images/${
           req.file.filename
         }`
-      }
-    : { ...req.body };
+      }))
+    : // Opérateur ternaire équivalent à if() {} else {} => condition ? Instruction si vrai : Instruction si faux
+      // Si la modification ne contient pas de nouvelle image
+      (sauceObject = {
+        ...req.body
+      });
   Sauce.updateOne(
-    { _id: req.params.id },
-    { ...sauceObject, _id: req.params.id }
+    // On applique les paramètre de sauceObject
+    {
+      _id: req.params.id
+    },
+    {
+      ...sauceObject,
+      _id: req.params.id
+    }
   )
-    .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-    .catch(error => res.status(400).json({ error }));
+    .then(() =>
+      res.status(200).json({
+        message: 'Sauce modifiée !'
+      })
+    )
+    .catch(error =>
+      res.status(400).json({
+        error
+      })
+    );
 };
+
 exports.deleteSauce = (req, res, next) => {
   Sauce.findOne({ _id: req.params.id })
     .then(sauce => {
@@ -58,7 +94,6 @@ exports.getAllSauce = (req, res, next) => {
       res.status(400).json({ error: error });
     });
 };
-
 exports.likeSauce = (req, res, next) => {
   let like = req.body.like;
   let userId = req.body.userId;
@@ -70,7 +105,7 @@ exports.likeSauce = (req, res, next) => {
         _id: sauceId
       },
       {
-        // On push l'utilisateur et on incrémente les likes de 1
+        // On push l'utilisateur dans le tableau des like et on incrémente les likes de 1
         $push: {
           usersLiked: userId
         },

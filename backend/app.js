@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 // Importation framework mongoose
 const mongoose = require('mongoose');
 // Router authentification
@@ -37,5 +39,13 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/api/auth', userRoutes);
 // Requetes concernant les sauces
 app.use('/api/sauces', saucesRoutes);
-
+// Helmet security
+app.use(helmet());
+// Express rate limit security
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+//  apply to all requests
+app.use(limiter);
 module.exports = app;

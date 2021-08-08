@@ -2,6 +2,8 @@
 const jwt = require('jsonwebtoken');
 // Accès au model User
 const User = require('../models/User');
+// Import bouncer
+const bouncer = require('../middleware/expressBouncer');
 // Cryptage du password
 const bcrypt = require('bcrypt');
 // Password validator
@@ -59,6 +61,8 @@ exports.login = (req, res, next) => {
                 .status(401)
                 .json({ error: 'Mot de passe incorrect !' });
             }
+            // Login succeeded we reset the bouncer
+            bouncer.reset(req);
             res.status(200).json({
               userId: user._id,
               token: jwt.sign({ userId: user._id }, 'RANDOM_TOKEN_SECRET', {

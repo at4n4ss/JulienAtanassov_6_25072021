@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const path = require('path');
 const helmet = require('helmet');
+
 // Express rate limit security
 const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({
@@ -15,12 +16,13 @@ const mongoose = require('mongoose');
 const userRoutes = require('./routes/user');
 // Routes sauces
 const saucesRoutes = require('./routes/sauces');
+require('dotenv').config();
 // Connection avec la base de donnée mongoose
 mongoose
-  .connect(
-    'mongodb+srv://at4:29041995stak4n0v@cluster0.ctk3o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority',
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
+  .connect(process.env.dbMongo, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => console.log('Connexion à MongoDB réussie !'))
   .catch(() => console.log('Connexion à MongoDB échouée !'));
 // Access control

@@ -2,6 +2,8 @@
 const jwt = require('jsonwebtoken');
 // Accès au model User
 const User = require('../models/User');
+const cryptoJS = require('crypto-js');
+require('dotenv').config();
 // Import bouncer
 const bouncer = require('../middleware/expressBouncer');
 // Cryptage du password
@@ -31,8 +33,12 @@ exports.signup = (req, res, next) => {
     bcrypt
       .hash(req.body.password, 10)
       .then(hash => {
+        const cipherText = cryptoJS
+          .HmacSHA512(req.body.email, process.env.secretHash)
+          .toString();
+        // crypto
         const user = new User({
-          email: req.body.email,
+          email: cipherText,
           password: hash
         });
         user
@@ -48,8 +54,12 @@ exports.signup = (req, res, next) => {
   }
 };
 exports.login = (req, res, next) => {
+  const cipherText = cryptoJS
+    .HmacSHA512(req.body.email, process.env.secretHash)
+    .toString();
   if (schemaPassword.validate(req.body.password)) {
-    User.findOne({ email: req.body.email })
+    // crypto
+    User.findOne({ email: cipherText })
       .then(user => {
         if (!user) {
           return res.status(401).json({ error: 'Utilisateur non trouvé !' });
@@ -66,7 +76,7 @@ exports.login = (req, res, next) => {
             bouncer.reset(req);
             res.status(200).json({
               userId: user._id,
-              token: jwt.sign({ userId: user._id }, 'RANDOM_TOKEN_SECRET', {
+              token: jwt.sign({ userId: user._id }, process.env.secretKey, {
                 expiresIn: '24h'
               })
             });
